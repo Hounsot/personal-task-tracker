@@ -1,6 +1,17 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 @import "tailwindcss";
 
+.auth-page { min-height: 100dvh; display: grid; place-items: center; padding: 24px; background: #fcfcfb; }
+.auth-card { width: min(100%, 400px); padding: 28px; background: white; border: 1px solid #e6e7ea; border-radius: 20px; }
+.auth-card h1 { font-size: 32px; margin: 0; }
+.auth-card p { color: #727780; line-height: 1.6; }
+.auth-card .primary-button { margin-top: 24px; background: #0a84ff; }
+.auth-switch { border: 0; background: transparent; color: #0765c4; padding: 12px 0; }
+button:disabled { cursor: wait; opacity: .55; }
+.sync-state { margin: 12px 24px 0; font-size: 13px; color: #727780; }
+.sync-state button { color: #0765c4; }
+.completed-tasks { margin-top: 24px; }
+
 :root { font-family: Inter, ui-sans-serif, system-ui, sans-serif; color: #16171a; background: #eeefee; font-synthesis: none; }
 * { box-sizing: border-box; }
 body { margin: 0; min-width: 320px; }
