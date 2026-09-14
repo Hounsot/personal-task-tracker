@@ -9,9 +9,11 @@ import {
   Plus,
   Trash2,
   X,
+  Sparkles,
 } from 'lucide-react'
 import { listTasks, saveTask, setTaskStatus, removeTask, supabase } from './api'
 import { Auth } from './Auth'
+import { Assistant } from './Assistant'
 import figmaCheck from './assets/figma-check.svg'
 import figmaPlus from './assets/figma-plus.svg'
 import type { Priority, Project, Task } from './types'
@@ -69,7 +71,7 @@ function TaskDetails({ task, onBack, onToggle, onDelete, onMore }: { task: Task;
       <header className="details-header">
         <IconButton label="Назад к задачам" onClick={onBack}><ArrowLeft size={20} /></IconButton>
         <h1>Задача</h1>
-        <IconButton label="Дополнительные действия" onClick={onMore}><Ellipsis size={20} /></IconButton>
+        <IconButton label="Обсудить задачу с ИИ" onClick={onMore}><Sparkles size={20} /></IconButton>
       </header>
       <div className="details-content">
         <section className="overview-card">
@@ -163,6 +165,7 @@ function App() {
   }, [])
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [sheetOpen, setSheetOpen] = useState(false)
+  const [assistantOpen, setAssistantOpen] = useState(false)
   const [toast, setToast] = useState<Toast>(null)
   useEffect(() => { const timeout = window.setTimeout(() => setScreen('list'), 1100); return () => window.clearTimeout(timeout) }, [])
   useEffect(() => { if (!toast) return; const timeout = window.setTimeout(() => setToast(null), 2800); return () => window.clearTimeout(timeout) }, [toast])
@@ -211,12 +214,14 @@ function App() {
       {loading && <p className="sync-state" role="status">Загружаем задачи…</p>}
       {saving && <p className="sync-state" role="status">Сохраняем…</p>}
       {loadError && <div className="sync-state" role="alert">{loadError} <button onClick={() => void refresh()}>Повторить</button></div>}
+      <button className="assistant-launch" onClick={() => setAssistantOpen(true)}><Sparkles size={19} /><span>ИИ-ассистент<small>Поможет с задачами</small></span><span className="assistant-beta">Бета</span></button>
       <div className="progress-row"><div className="progress"><span style={{ width: `${tasks.length ? (doneTasks.length / tasks.length) * 100 : 0}%` }} /></div><span>Выполнено {doneTasks.length} из {tasks.length}</span></div>
       <div className="sections">{groups.map(([title, group]) => <TaskSection key={title} title={title} tasks={group} onOpen={openTask} onToggle={toggleTask} />)}<div className="completed-tasks"><TaskSection title="Выполнено" tasks={doneTasks} onOpen={openTask} onToggle={toggleTask} /></div>{!loading && !loadError && tasks.length === 0 && <p className="empty-message">Пока нет задач. Создайте первую, чтобы начать.</p>}</div>
       <button className="floating-add" aria-label="Создать новую задачу" onClick={() => setSheetOpen(true)}><img src={figmaPlus} alt="" /></button>
       </main>
-      {screen === 'details' && selectedTask ? <TaskDetails task={selectedTask} onBack={() => setScreen('list')} onToggle={() => toggleTask(selectedTask.id)} onDelete={() => deleteTask(selectedTask.id)} onMore={() => setToast({ message: 'Дополнительные действия появятся позже', kind: 'error' })} /> : <aside className="desktop-placeholder"><CheckCircle2 size={40} strokeWidth={1.2} /><h2>Всё начинается с одной задачи</h2><p>Выберите задачу в списке, чтобы посмотреть детали, или создайте новую.</p></aside>}
+      {screen === 'details' && selectedTask ? <TaskDetails task={selectedTask} onBack={() => setScreen('list')} onToggle={() => toggleTask(selectedTask.id)} onDelete={() => deleteTask(selectedTask.id)} onMore={() => setAssistantOpen(true)} /> : <aside className="desktop-placeholder"><CheckCircle2 size={40} strokeWidth={1.2} /><h2>Всё начинается с одной задачи</h2><p>Выберите задачу в списке, чтобы посмотреть детали, или создайте новую.</p></aside>}
       {sheetOpen && <TaskSheet onClose={() => setSheetOpen(false)} onCreate={createTask} />}
+      {assistantOpen && <Assistant task={screen === 'details' ? selectedTask : undefined} onClose={() => setAssistantOpen(false)} onChanged={() => void refresh()} />}
     </div>
     {toast && <div className={`toast ${toast.kind}`} role="status">{toast.kind === 'success' ? <CheckCircle2 size={18} /> : <Folder size={18} />}{toast.message}</div>}
   </div>

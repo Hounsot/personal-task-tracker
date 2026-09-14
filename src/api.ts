@@ -30,3 +30,8 @@ export async function removeTask(id: string) {
   const { error } = await client().from('tasks').delete().eq('id', id).abortSignal(AbortSignal.timeout(15000))
   if (error) throw error
 }
+export async function editTask(id: string, changes: Partial<NewTask>) {
+  const { data, error } = await client().from('tasks').update(changes).eq('id', id).select(fields).abortSignal(AbortSignal.timeout(15000)).single()
+  if (error) throw error
+  return data as Task
+}
