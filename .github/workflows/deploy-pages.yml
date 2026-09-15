@@ -33,6 +33,8 @@ jobs:
           VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL || 'https://bvjffchnozefelfbfbry.supabase.co' }}
           # This publishable key is public; table access is protected by Supabase RLS.
           VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY || 'sb_publishable_aVZi8LjZR0fKdalZyeMfTA_A36Spu5W' }}
+          # Counter ID is public. The tag loads only after the visitor gives consent in the app.
+          VITE_YANDEX_METRIKA_ID: ${{ vars.VITE_YANDEX_METRIKA_ID || '112675328' }}
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Upload artifact

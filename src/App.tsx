@@ -14,6 +14,8 @@ import {
 import { listTasks, saveTask, setTaskStatus, removeTask, supabase } from './api'
 import { Auth } from './Auth'
 import { Assistant } from './Assistant'
+import { AnalyticsConsent } from './AnalyticsConsent'
+import { markTaskWorkStarted, timeToCompleteSeconds, trackEvent } from './analytics'
 import figmaCheck from './assets/figma-check.svg'
 import figmaPlus from './assets/figma-plus.svg'
 import type { Priority, Project, Task } from './types'
@@ -177,7 +179,11 @@ function App() {
     ['Личное', openTasks.filter((task) => task.priority !== 'Высокий' && task.project === 'Личное')],
     ['Работа', openTasks.filter((task) => task.priority !== 'Высокий' && task.project !== 'Личное')],
   ] as const, [openTasks])
-  const openTask = (task: Task) => { setSelectedId(task.id); setScreen('details') }
+  const openTask = (task: Task) => {
+    if (task.status === 'open') markTaskWorkStarted(task.id)
+    setSelectedId(task.id); setScreen('details')
+  }
+  const openAssistant = () => { trackEvent('ai_assistant_opened'); setAssistantOpen(true) }
   async function mutate(action: () => Promise<void>) {
     if (busy.current) return
     busy.current = true; generation.current++; setSaving(true)
@@ -190,6 +196,7 @@ function App() {
     if (!task) return
     const saved = await setTaskStatus(id, task.status === 'open' ? 'done' : 'open')
     setTasks(current => current.map(item => item.id === id ? saved : item))
+    if (saved.status === 'done') trackEvent('task_completed', { time_to_complete_seconds: timeToCompleteSeconds(task.id, task.createdAt), time_basis: 'first_open_or_created' })
   })
   const deleteTask = (id = selectedId) => mutate(async () => {
     if (!id) return
@@ -202,6 +209,7 @@ function App() {
     busy.current = true; generation.current++
     try {
     const newTask = await saveTask(task, id)
+    trackEvent('task_created', { source: 'form' })
     setTasks((current) => [newTask, ...current]); setSelectedId(newTask.id); setSheetOpen(false); setScreen('details'); setToast({ message: 'Задача создана', kind: 'success' })
     } finally { busy.current = false; void refresh() }
   }
@@ -214,12 +222,12 @@ function App() {
       {loading && <p className="sync-state" role="status">Загружаем задачи…</p>}
       {saving && <p className="sync-state" role="status">Сохраняем…</p>}
       {loadError && <div className="sync-state" role="alert">{loadError} <button onClick={() => void refresh()}>Повторить</button></div>}
-      <button className="assistant-launch" onClick={() => setAssistantOpen(true)}><Sparkles size={19} /><span>ИИ-ассистент<small>Поможет с задачами</small></span><span className="assistant-beta">Бета</span></button>
+      <button className="assistant-launch" onClick={openAssistant}><Sparkles size={19} /><span>ИИ-ассистент<small>Поможет с задачами</small></span><span className="assistant-beta">Бета</span></button>
       <div className="progress-row"><div className="progress"><span style={{ width: `${tasks.length ? (doneTasks.length / tasks.length) * 100 : 0}%` }} /></div><span>Выполнено {doneTasks.length} из {tasks.length}</span></div>
       <div className="sections">{groups.map(([title, group]) => <TaskSection key={title} title={title} tasks={group} onOpen={openTask} onToggle={toggleTask} />)}<div className="completed-tasks"><TaskSection title="Выполнено" tasks={doneTasks} onOpen={openTask} onToggle={toggleTask} /></div>{!loading && !loadError && tasks.length === 0 && <p className="empty-message">Пока нет задач. Создайте первую, чтобы начать.</p>}</div>
       <button className="floating-add" aria-label="Создать новую задачу" onClick={() => setSheetOpen(true)}><img src={figmaPlus} alt="" /></button>
       </main>
-      {screen === 'details' && selectedTask ? <TaskDetails task={selectedTask} onBack={() => setScreen('list')} onToggle={() => toggleTask(selectedTask.id)} onDelete={() => deleteTask(selectedTask.id)} onMore={() => setAssistantOpen(true)} /> : <aside className="desktop-placeholder"><CheckCircle2 size={40} strokeWidth={1.2} /><h2>Всё начинается с одной задачи</h2><p>Выберите задачу в списке, чтобы посмотреть детали, или создайте новую.</p></aside>}
+      {screen === 'details' && selectedTask ? <TaskDetails task={selectedTask} onBack={() => setScreen('list')} onToggle={() => toggleTask(selectedTask.id)} onDelete={() => deleteTask(selectedTask.id)} onMore={openAssistant} /> : <aside className="desktop-placeholder"><CheckCircle2 size={40} strokeWidth={1.2} /><h2>Всё начинается с одной задачи</h2><p>Выберите задачу в списке, чтобы посмотреть детали, или создайте новую.</p></aside>}
       {sheetOpen && <TaskSheet onClose={() => setSheetOpen(false)} onCreate={createTask} />}
       {assistantOpen && <Assistant task={screen === 'details' ? selectedTask : undefined} onClose={() => setAssistantOpen(false)} onChanged={() => void refresh()} />}
     </div>
@@ -227,4 +235,4 @@ function App() {
   </div>
 }
 
-export default function Root() { return <Auth>{userId => <App key={userId} />}</Auth> }
+export default function Root() { return <><AnalyticsConsent /><Auth>{userId => <App key={userId} />}</Auth></> }

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Sparkles, X, ArrowUp } from 'lucide-react'
 import type { Task } from './types'
 import { supabase, saveTask, editTask, removeTask, type NewTask } from './api'
+import { trackEvent } from './analytics'
 type Proposal = { action: 'create' | 'update' | 'delete'; taskId: string; title: string; changes: Partial<NewTask> }
 
 export function Assistant({ task, onClose, onChanged }: { task?: Task; onClose: () => void; onChanged: () => void }) {
@@ -30,6 +31,7 @@ export function Assistant({ task, onClose, onChanged }: { task?: Task; onClose: 
       if (proposal.action === 'create') await saveTask(proposal.changes as NewTask, proposal.taskId)
       if (proposal.action === 'update') await editTask(proposal.taskId, proposal.changes)
       if (proposal.action === 'delete') await removeTask(proposal.taskId)
+      if (proposal.action === 'create') trackEvent('task_created', { source: 'ai_assistant' })
       setProposal(null); setDraft(''); setMessage('Готово. Изменение сохранено.'); onChanged()
     } catch { setMessage('Сохранение не подтверждено. Проверьте список задач перед повторной попыткой.'); onChanged() }
     finally { lock.current = false; setPending(false) }
