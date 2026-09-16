@@ -1,8 +1,9 @@
 import { useEffect, useState, type FormEvent, type ReactNode } from 'react'
 import type { Session } from '@supabase/supabase-js'
+import { Moon, Sun } from 'lucide-react'
 import { supabase } from './api'
 import { trackEvent } from './analytics'
-export function Auth({ children }: { children: (userId: string) => ReactNode }) {
+export function Auth({ children, darkMode, onToggleTheme }: { children: (userId: string) => ReactNode; darkMode: boolean; onToggleTheme: () => void }) {
   const [session, setSession] = useState<Session | null>(null)
   const [ready, setReady] = useState(false)
   const [email, setEmail] = useState('')
@@ -31,10 +32,10 @@ export function Auth({ children }: { children: (userId: string) => ReactNode }) 
     } catch { setMessage('Не удалось войти или создать аккаунт. Проверьте почту, пароль и соединение; для нового аккаунта подтвердите почту.') }
     finally { setPending(false) }
   }
-  if (!supabase) return <main className="auth-page"><section className="auth-card"><h1>Focus</h1><p>Подключение к облаку ещё не настроено. Попробуйте открыть приложение позже.</p></section></main>
+  if (!supabase) return <main className="auth-page"><section className="auth-card"><button className="theme-toggle" onClick={onToggleTheme} aria-label={darkMode ? 'Включить светлую тему' : 'Включить тёмную тему'}>{darkMode ? <Sun size={18} /> : <Moon size={18} />}</button><h1>Focus</h1><p>Подключение к облаку ещё не настроено. Попробуйте открыть приложение позже.</p></section></main>
   if (!ready) return <main className="auth-page"><p role="status">Восстанавливаем вход…</p></main>
   if (session) return children(session.user.id)
-  return <main className="auth-page"><form className="auth-card" onSubmit={submit}><h1>Focus</h1><p>Ваши задачи на всех устройствах</p>
+  return <main className="auth-page"><form className="auth-card" onSubmit={submit}><button type="button" className="theme-toggle" onClick={onToggleTheme} aria-label={darkMode ? 'Включить светлую тему' : 'Включить тёмную тему'}>{darkMode ? <Sun size={18} /> : <Moon size={18} />}</button><h1>Focus</h1><p>Ваши задачи на всех устройствах</p>
     <label className="field"><span>ПОЧТА</span><input type="email" autoComplete="email" required value={email} onChange={e => setEmail(e.target.value)} /></label>
     <label className="field"><span>ПАРОЛЬ</span><input type="password" autoComplete={register ? 'new-password' : 'current-password'} minLength={8} required value={password} onChange={e => setPassword(e.target.value)} /></label>
     {message && <p role="status">{message}</p>}
