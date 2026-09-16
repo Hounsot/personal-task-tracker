@@ -10,6 +10,8 @@ import {
   Trash2,
   X,
   Sparkles,
+  Moon,
+  Sun,
 } from 'lucide-react'
 import { listTasks, saveTask, setTaskStatus, removeTask, supabase } from './api'
 import { Auth } from './Auth'
@@ -140,7 +142,11 @@ function TaskSheet({ onClose, onCreate }: { onClose: () => void; onCreate: (task
   )
 }
 
-function App() {
+function ThemeToggle({ darkMode, onToggle }: { darkMode: boolean; onToggle: () => void }) {
+  return <button type="button" className="theme-toggle" onClick={onToggle} aria-label={darkMode ? 'Включить светлую тему' : 'Включить тёмную тему'}>{darkMode ? <Sun size={18} /> : <Moon size={18} />}</button>
+}
+
+function App({ darkMode, onToggleTheme }: { darkMode: boolean; onToggleTheme: () => void }) {
   const [screen, setScreen] = useState<Screen>('splash')
   const [tasks, setTasks] = useState<Task[]>([])
   const [loading, setLoading] = useState(true)
@@ -216,9 +222,9 @@ function App() {
   if (screen === 'splash') return <div className="app-shell"><div className="workspace"><main className="screen splash"><div className="brand-mark"><Check size={50} strokeWidth={2.6} /></div><h1>Focus</h1><p>Личный трекер задач</p><div className="loading"><span /></div><small>Загружаем ваш день</small></main></div></div>
   return <div className="app-shell">
     <div className={`workspace desktop-workspace ${screen === 'details' && selectedTask ? 'has-selection' : ''}`}>
-      <header className="desktop-toolbar"><div className="desktop-brand"><Check size={24} /><strong>Focus</strong><span>Личные задачи</span></div><button className="desktop-create" onClick={() => setSheetOpen(true)}><img src={figmaPlus} alt="" />Новая задача</button></header>
+      <header className="desktop-toolbar"><div className="desktop-brand"><Check size={24} /><strong>Focus</strong><span>Личные задачи</span></div><div className="desktop-actions"><ThemeToggle darkMode={darkMode} onToggle={onToggleTheme} /><button className="desktop-create" onClick={() => setSheetOpen(true)}><img src={figmaPlus} alt="" />Новая задача</button></div></header>
       <main className="screen list-screen">
-      <header className="list-header"><div><h1>Мои задачи</h1><p>{new Date().toLocaleDateString('ru-RU', { weekday: 'long', day: 'numeric', month: 'long' })}</p></div><button className="auth-switch" disabled={saving} onClick={async () => { const result = await supabase!.auth.signOut(); if (result.error) setToast({ message: 'Не удалось выйти. Повторите попытку.', kind: 'error' }) }}>Выйти</button></header>
+      <header className="list-header"><div><h1>Мои задачи</h1><p>{new Date().toLocaleDateString('ru-RU', { weekday: 'long', day: 'numeric', month: 'long' })}</p></div><div className="list-actions"><ThemeToggle darkMode={darkMode} onToggle={onToggleTheme} /><button className="auth-switch" disabled={saving} onClick={async () => { const result = await supabase!.auth.signOut(); if (result.error) setToast({ message: 'Не удалось выйти. Повторите попытку.', kind: 'error' }) }}>Выйти</button></div></header>
       {loading && <p className="sync-state" role="status">Загружаем задачи…</p>}
       {saving && <p className="sync-state" role="status">Сохраняем…</p>}
       {loadError && <div className="sync-state" role="alert">{loadError} <button onClick={() => void refresh()}>Повторить</button></div>}
@@ -235,4 +241,14 @@ function App() {
   </div>
 }
 
-export default function Root() { return <><AnalyticsConsent /><Auth>{userId => <App key={userId} />}</Auth></> }
+export default function Root() {
+  const [darkMode, setDarkMode] = useState(() => {
+    try { return localStorage.getItem('focus.theme') === 'dark' } catch { return false }
+  })
+  const toggleTheme = () => setDarkMode((current) => {
+    const next = !current
+    try { localStorage.setItem('focus.theme', next ? 'dark' : 'light') } catch { /* Storage may be blocked. */ }
+    return next
+  })
+  return <div className={darkMode ? 'theme-dark' : 'theme-light'}><AnalyticsConsent /><Auth darkMode={darkMode} onToggleTheme={toggleTheme}>{userId => <App key={userId} darkMode={darkMode} onToggleTheme={toggleTheme} />}</Auth></div>
+}

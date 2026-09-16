@@ -43,6 +43,7 @@
 
 .auth-page { min-height: 100dvh; display: grid; place-items: center; padding: 24px; background: #fcfcfb; }
 .auth-card { width: min(100%, 400px); padding: 28px; background: white; border: 1px solid #e6e7ea; border-radius: 20px; }
+.auth-card { position: relative; }
 .auth-card h1 { font-size: 32px; margin: 0; }
 .auth-card p { color: #727780; line-height: 1.6; }
 .auth-card .primary-button { margin-top: 24px; background: #0a84ff; }
@@ -65,6 +66,7 @@ button { cursor: pointer; }
 .list-header h1 { margin: 0; color: #0a0a0b; font-size: 32px; font-weight: 800; letter-spacing: -1px; line-height: 1; }
 .list-header p { margin: 7px 0 0; color: #8a8a8e; font-size: 13px; font-weight: 500; }
 .icon-button { display: inline-grid; place-items: center; flex: 0 0 auto; width: 40px; height: 40px; padding: 0; color: #29292c; background: #fff; border: 1px solid #e4e4e7; border-radius: 50%; box-shadow: 0 1px 3px rgb(0 0 0 / 8%); transition: transform .16s, background .16s; }
+.theme-toggle { display: inline-grid; place-items: center; width: 38px; height: 38px; padding: 0; color: #4d4e54; background: transparent; border: 1px solid #e1e2e5; border-radius: 11px; transition: background .16s, border-color .16s; }.theme-toggle:hover { background: #f2f3f5; }.auth-card .theme-toggle { position: absolute; top: 18px; right: 18px; }
 .icon-button:hover { background: #f5f5f5; transform: translateY(-1px); }
 .icon-button.danger { color: #cf4e4e; }
 .progress-row { display: flex; align-items: center; gap: 12px; padding: 20px 24px 2px; color: #8a8a8e; font-size: 12px; font-weight: 500; white-space: nowrap; }
@@ -135,6 +137,7 @@ button { cursor: pointer; }
 .screen, .sheet-layer { border-radius: 0; box-shadow: none; }
 
 .desktop-toolbar, .desktop-placeholder, .desktop-completed { display: none; }
+.list-actions, .desktop-actions { display: flex; align-items: center; gap: 10px; }.list-actions .auth-switch { padding: 8px 0 8px 2px; }
 .has-selection .list-screen { display: none; }
 .empty-message { color: #727780; line-height: 1.6; }
 .details-content, .sections { min-height: 0; }
@@ -176,6 +179,9 @@ button:focus-visible { outline: 3px solid #0a84ff; outline-offset: 3px; }
   .sheet-header { flex-shrink: 0; padding-top: 0; }
   .toast { position: fixed; top: 24px; }
 }
+
+/* Dark theme intentionally mirrors the existing neutral, high-contrast UI. */
+.theme-dark { color: #f2f3f5; background: #111216; }.theme-dark .auth-page, .theme-dark .app-shell, .theme-dark .desktop-workspace { background: #111216; }.theme-dark .auth-card, .theme-dark .screen, .theme-dark .desktop-workspace, .theme-dark .task-sheet, .theme-dark .assistant-panel, .theme-dark .analytics-consent { color: #f2f3f5; background: #1a1c21; border-color: #34363d; }.theme-dark .auth-card p, .theme-dark .list-header p, .theme-dark .sync-state, .theme-dark .sheet-header p, .theme-dark .assistant-header p, .theme-dark .assistant-body p, .theme-dark .assistant-composer small, .theme-dark .property, .theme-dark .desktop-brand span, .theme-dark .empty-message { color: #a9adb7; }.theme-dark .list-header h1, .theme-dark .task-title, .theme-dark .overview-card h2, .theme-dark .property strong, .theme-dark .desktop-placeholder h2, .theme-dark .assistant-header h2, .theme-dark .assistant-body h3 { color: #f6f7f8; }.theme-dark .task-list { background: #34363d; border-color: #34363d; }.theme-dark .task-row, .theme-dark .overview-card, .theme-dark .properties-card, .theme-dark .settings-card, .theme-dark .assistant-examples button { color: #eef0f3; background: #22242a; border-color: #383a42; }.theme-dark .task-row:hover, .theme-dark .assistant-examples button:hover { background: #292c33; }.theme-dark .task-row.done .task-title { color: #9398a3; }.theme-dark .project-chip, .theme-dark .focus-chip, .theme-dark .assistant-context, .theme-dark .assistant-notice { color: #c8cbd1; background: #292c33; }.theme-dark .field input, .theme-dark .field textarea, .theme-dark .assistant-composer > div { color: #f2f3f5; background: #22242a; border-color: #3d4048; }.theme-dark .field input::placeholder, .theme-dark .field textarea::placeholder { color: #858a95; }.theme-dark .setting, .theme-dark .property, .theme-dark .assistant-header, .theme-dark .assistant-composer, .theme-dark .details-actions, .theme-dark .desktop-toolbar, .theme-dark .desktop-workspace .list-screen { border-color: #34363d; }.theme-dark .setting select { color: #eef0f3; }.theme-dark .icon-button, .theme-dark .theme-toggle { color: #e4e6ea; background: #24262c; border-color: #3c3f47; }.theme-dark .theme-toggle:hover, .theme-dark .icon-button:hover { background: #30333a; }.theme-dark .assistant-dialog { color: #f2f3f5; border-color: #3b3d45; background: #1a1c21; }.theme-dark .assistant-proposal { border-color: #335f90; background: #1d2937; }.theme-dark .analytics-consent { box-shadow: 0 16px 42px rgb(0 0 0 / 42%); }.theme-dark .progress { background: #363941; }.theme-dark .progress span { background: #f2f3f5; }.theme-dark .desktop-placeholder { color: #9297a1; }.theme-dark .splash { background: #1a1c21; }.theme-dark .auth-switch { color: #68aeff; }
 
 @media (min-width: 700px) and (max-width: 1050px) {
   .desktop-toolbar { padding: 0 20px; }
